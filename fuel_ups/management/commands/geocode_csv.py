@@ -1,12 +1,12 @@
 import csv
-import json
 import logging
-import os
 import time
+from pathlib import Path
 
 from django.core.management.base import BaseCommand
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-from geopy.geocoders import Nominatim
+
+from fuel_ups.utils.geocode_cache import GeocodeCache
+from fuel_ups.utils.geocoder import Geocoder
 
 logger = logging.getLogger(__name__)
 
@@ -32,85 +32,56 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
-        input_path = kwargs.get("input", "data/fuel-prices-for-be-assessment.csv")
-        output_path = kwargs.get("output", "data/fuelstops_address_geocoded.csv")
-        cache_path = kwargs.get("cache", "data/geocode_cache.json")
+        input_path = Path(kwargs.get("input", "data/fuel-prices-for-be-assessment.csv"))
+        output_path = Path(kwargs.get("output", "data/fuelstops_address_geocoded.csv"))
+        cache_path = Path(kwargs.get("cache", "data/geocode_cache.json"))
 
         seen_ids = set()
-        fieldnames = None
+        cache = GeocodeCache(cache_path)
+        geocoder = Geocoder()
 
-        # Load existing cache
-        cache = {}
-        if os.path.exists(cache_path):
-            with open(cache_path, "r") as f:
-                try:
-                    cache = json.load(f)
-                except json.JSONDecodeError:
-                    self.stdout.write(
-                        self.style.WARNING(
-                            "Cache file is empty or invalid. Starting fresh."
-                        )
-                    )
-        geolocator = Nominatim(user_agent="fuelstop_geocoder")
-
-        with open(input_path, newline="", encoding="utf-8") as infile, open(
-            output_path, "w", newline="", encoding="utf-8"
+        with input_path.open(newline="", encoding="utf-8") as infile, output_path.open(
+            "w", newline="", encoding="utf-8"
         ) as outfile:
-
             reader = csv.DictReader(infile)
-            fieldnames = reader.fieldnames + ["latitude", "longitude"]
+            fieldnames = (
+                reader.fieldnames + ["Latitude", "Longitude"]
+                if reader.fieldnames
+                else []
+            )
             writer = csv.DictWriter(outfile, fieldnames=fieldnames)
             writer.writeheader()
 
             for row in reader:
                 truckstop_id = row["OPIS Truckstop ID"].strip()
                 if truckstop_id in seen_ids:
-                    continue  # Skip duplicates
+                    continue
                 seen_ids.add(truckstop_id)
 
-                # If already in cache, write cached result
-                if truckstop_id in cache:
-                    lat, lon = cache[truckstop_id]
-                    row["latitude"] = lat
-                    row["longitude"] = lon
+                cached = cache.get(truckstop_id)
+                if cached:
+                    row["Latitude"], row["Longitude"] = cached
                     writer.writerow(row)
                     continue
 
-                # Build address string
                 truckstop_name = row["Truckstop Name"].strip()
-
-                try:
-                    location = geolocator.geocode(truckstop_name)
-                    if location:
-                        lat = location.latitude
-                        lon = location.longitude
-                        cache[truckstop_id] = [lat, lon]
-
-                        # Write cache incrementally
-                        with open(cache_path, "w") as f:
-                            json.dump(cache, f)
-
-                        row["latitude"] = lat
-                        row["longitude"] = lon
-                    else:
-                        continue
-                    print(row)
-                    print("***********************************")
-                    writer.writerow(row)
-                    time.sleep(1)  # Rate limit
-
-                except (GeocoderTimedOut, GeocoderServiceError) as e:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f"Geocoding error for {truckstop_name}: {str(e)}"
-                        )
+                coordinate = geocoder.fetch(truckstop_name)
+                if coordinate:
+                    lat, lon = coordinate
+                    cache.set(truckstop_id, lat, lon)
+                    row["Latitude"], row["Longitude"] = lat, lon
+                    print(
+                        f"Geocoded: {truckstop_id} - {truckstop_name} → ({lat}, {lon})"
                     )
+                    print("*" * 30)
+                    writer.writerow(row)
+                    time.sleep(1)
+                else:
                     continue
-                except Exception as e:
-                    logger.error(f"Error processing {truckstop_id}: {e}")
-                    self.stdout.write(self.style.ERROR(f"Unexpected error: {e}"))
-                    continue
+                    # logger.warning(
+                    #     f"Skipping: No coordinates found for '{truckstop_name}'"
+                    # )
 
         self.stdout.write(
-            self.style.SUCCESS("Geocoding complete. Output saved to %s" % output_path)
+            self.style.SUCCESS(f"Geocoding complete. Output saved to: {output_path}")
         )

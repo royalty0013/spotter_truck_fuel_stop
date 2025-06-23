@@ -3,9 +3,6 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-from geopy.geocoders import Nominatim
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,18 +32,3 @@ class GeocodeCache:
     def save(self):
         with self.path.open("w", encoding="utf-8") as f:
             json.dump(self.data, f, indent=2)
-
-
-class Geocoder:
-    def __init__(self):
-        self.client = Nominatim(user_agent="fuelstop_geocoder")
-
-    def fetch(self, address: str) -> Optional[Tuple[float, float]]:
-        try:
-            location = self.client.geocode(address)
-            if location:
-                return location.latitude, location.longitude
-        except (GeocoderTimedOut, GeocoderServiceError) as e:
-            logger.error(f"Geocoding service error for {address}: {e}")
-            print(f"Geocoding service error for {address}: {e}")
-        return None
