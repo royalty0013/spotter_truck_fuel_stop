@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from django.contrib.gis.geos import Point
 
-from fuel_ups.models import FuelStop
+from fuel_stops.models import FuelStop
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,11 @@ class FuelStopImporter:
             ).values_list("opis_truckstop", flat=True)
         )
 
-        new_fuelstops = [f for f in fuelstops if f.opis_truckstop not in existing_ids]
+        new_fuelstops = [
+            fuelstop
+            for fuelstop in fuelstops
+            if fuelstop.opis_truckstop not in existing_ids
+        ]
 
         if new_fuelstops:
             FuelStop.objects.bulk_create(new_fuelstops)

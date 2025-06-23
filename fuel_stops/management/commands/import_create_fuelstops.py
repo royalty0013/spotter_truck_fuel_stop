@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from fuel_ups.utils.import_create_fuelstops import FuelStopImporter
+from fuel_stops.utils.import_create_fuelstops import FuelStopImporter
 
 logger = logging.getLogger(__name__)
 

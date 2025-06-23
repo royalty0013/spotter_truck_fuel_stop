@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from fuel_ups.models import FuelStop
+from fuel_stops.models import FuelStop
 
 
 @admin.register(FuelStop)

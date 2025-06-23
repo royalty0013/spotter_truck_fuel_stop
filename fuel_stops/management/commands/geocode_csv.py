@@ -5,8 +5,8 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from fuel_ups.utils.geocode_cache import GeocodeCache
-from fuel_ups.utils.geocoder import Geocoder
+from fuel_stops.utils.geocode_cache import GeocodeCache
+from fuel_stops.utils.geocoder import Geocoder
 
 logger = logging.getLogger(__name__)
 
