@@ -6,13 +6,12 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from fuel_stops.constants import MPG, VEHICLE_RANGE_MILES
 from fuel_stops.serializers import OptimalFuelStopRouteSerializer
 from fuel_stops.services.route_optimizer_service import RouteOptimizerService
 from fuel_stops.utils.open_route_service import OpenRouteServiceClient
 
 logger = logging.getLogger(__name__)
-
-MILES_TO_METERS = 1609.34
 
 
 class OptimalFuelStopRouteAPIView(APIView):
@@ -36,8 +35,8 @@ class OptimalFuelStopRouteAPIView(APIView):
             optimizer = RouteOptimizerService(
                 start=(start_lon, start_lat),
                 steps=route_data.get("steps", []),
-                vehicle_range_miles=500,
-                mpg=10,
+                vehicle_range_miles=VEHICLE_RANGE_MILES,
+                mpg=MPG,
             )
             fuel_stops, total_cost = optimizer.compute_optimal_stops()
 

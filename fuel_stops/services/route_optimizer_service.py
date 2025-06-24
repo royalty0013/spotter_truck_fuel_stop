@@ -6,9 +6,8 @@ from geojson import Feature, FeatureCollection
 from geojson import Point as P
 from rest_framework.exceptions import ValidationError
 
+from fuel_stops.constants import MILES_TO_METERS
 from fuel_stops.models import FuelStop
-
-MILES_TO_METERS = 1609.34
 
 
 class RouteOptimizerService:
