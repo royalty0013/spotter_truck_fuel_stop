@@ -2,6 +2,7 @@ import logging
 from decimal import Decimal
 
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,30 +27,29 @@ class OptimalFuelStopRouteAPIView(APIView):
         end_lon = validated_data["end_lon"]
         end_lat = validated_data["end_lat"]
 
-        route_data = OpenRouteServiceClient().get_route(
-            (start_lon, start_lat), (end_lon, end_lat)
-        )
-        if not route_data:
-            return Response(
-                {"error": "Failed to fetch route"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        try:
+            ors_client = OpenRouteServiceClient()
+            route_data = ors_client.get_route(
+                (start_lon, start_lat), (end_lon, end_lat)
             )
 
-        optimizer = RouteOptimizerService(
-            start=(start_lon, start_lat),
-            steps=route_data.get("steps", []),
-            vehicle_range_miles=500,
-            mpg=10,
-        )
-
-        try:
+            optimizer = RouteOptimizerService(
+                start=(start_lon, start_lat),
+                steps=route_data.get("steps", []),
+                vehicle_range_miles=500,
+                mpg=10,
+            )
             fuel_stops, total_cost = optimizer.compute_optimal_stops()
+
             map_data = optimizer.generate_map_geojson(
                 route_data.get("geometry"), fuel_stops
             )
-        except Exception as e:
+        except ValidationError as e:
             logger.error(f"Error optimizing fuel stops: {e}")
-            return Response({"error": "Route optimization failed"}, status=500)
+            return Response(
+                {"error": "Route optimization failed"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {

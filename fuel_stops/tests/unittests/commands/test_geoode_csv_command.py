@@ -1,12 +1,9 @@
-# fuel_stops/tests/test_geocode_csv_command.py
-
 import csv
 
 
 def test_geocode_csv_writes_output_with_lat_lon(
     mock_open_csv, mock_geocoder_success, call_geocode_command
 ):
-    """Test command writes latitude/longitude to output CSV"""
     output_file = call_geocode_command()
 
     assert output_file.exists()
@@ -25,7 +22,6 @@ def test_geocode_csv_writes_output_with_lat_lon(
 def test_geocode_csv_skips_ungeocodable_addresses(
     mock_open_csv, mock_geocoder_failure, call_geocode_command
 ):
-    """Test rows that can't be geocoded are skipped"""
     output_file = call_geocode_command()
 
     assert output_file.exists()
@@ -40,11 +36,9 @@ def test_geocode_csv_skips_ungeocodable_addresses(
 def test_geocode_csv_uses_cache_and_skips_reprocessing(
     mock_open_csv, mock_geocoder_success, call_geocode_command
 ):
-    """Test cached entries are used and not reprocessed"""
     output_file = call_geocode_command()
     first_run = list(csv.DictReader(open(output_file)))
 
-    # Run again — shouldn't call geocoder again
     output_file_second = call_geocode_command()
     second_run = list(csv.DictReader(open(output_file_second)))
 

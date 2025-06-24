@@ -3,6 +3,9 @@ import logging
 import openrouteservice
 from decouple import config
 from django.core.cache import cache
+from rest_framework.exceptions import ValidationError
+
+from fuel_stops.exceptions import ORSException
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +41,9 @@ class OpenRouteServiceClient:
 
             return simplified
 
-        except Exception as e:
+        except ORSException as e:
             logger.error(f"Error fetching route: {e}", exc_info=True)
-            return None
+            raise ValidationError("Failed to fetch route from OpenRouteService")
 
     def _fetch_full_route_from_ors(self, origin: tuple, destination: tuple) -> dict:
         """Fetches the full route from OpenRouteService.
@@ -61,7 +64,7 @@ class OpenRouteServiceClient:
             return response
         except Exception as e:
             logger.error(f"OpenRouteService request failed: {e}")
-            return None
+            raise ORSException(str(e))
 
     def _simplify_geojson(self, geojson: dict) -> dict:
         """Simplifies the GeoJSON response from OpenRouteService.
@@ -93,4 +96,4 @@ class OpenRouteServiceClient:
 
         except (KeyError, IndexError, TypeError) as e:
             logger.error(f"Malformed ORS response: missing expected keys - {e}")
-            return None
+            raise ORSException(str(e))

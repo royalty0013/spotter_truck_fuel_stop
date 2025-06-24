@@ -4,6 +4,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from geojson import Feature, FeatureCollection
 from geojson import Point as P
+from rest_framework.exceptions import ValidationError
 
 from fuel_stops.models import FuelStop
 
@@ -56,8 +57,10 @@ class RouteOptimizerService:
                 nearest_stop = self.find_nearest_fuel_stop(
                     self.current_pos, within=100 * MILES_TO_METERS
                 )
+                print(nearest_stop)
+                print("****************")
                 if not nearest_stop:
-                    raise Exception("No fuel stop found within range.")
+                    raise ValidationError("No fuel stop found within range.")
 
                 gallons_bought = Decimal(self.remaining_range / self.mpg).quantize(
                     Decimal("0.000"), rounding=ROUND_HALF_UP

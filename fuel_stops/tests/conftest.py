@@ -1,6 +1,5 @@
-# fuel_stops/tests/conftest.py
-
 import csv
+from decimal import Decimal
 from unittest.mock import Mock, patch
 
 import pytest
@@ -161,3 +160,87 @@ def call_geocode_command(mock_open_csv):
         return output_file
 
     return _call
+
+
+@pytest.fixture
+def mock_ors_client():
+    with patch(
+        "fuel_stops.utils.open_route_service.OpenRouteServiceClient"
+    ) as mock_class:
+        instance = mock_class.return_value
+        instance.get_route.return_value = {
+            "steps": [
+                {"distance": 490 * 1609.34},
+                {"distance": 200 * 1609.34},
+                {"distance": 250 * 1609.34},
+                {"distance": 100 * 1609.34},
+            ],
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[-85.6243147, 30.1755249], [-112.0537895, 41.5092474]],
+            },
+        }
+        yield instance
+
+
+@pytest.fixture
+def mock_optimizer_service():
+    with patch(
+        "fuel_stops.services.route_optimizer_service.RouteOptimizerService"
+    ) as mock_class:
+        instance = mock_class.return_value
+        instance.compute_optimal_stops.return_value = (
+            [
+                {
+                    "truckstop_name": "Cheapest Stop",
+                    "retail_price": Decimal("3.00"),
+                    "latitude": 41.5092474,
+                    "longitude": -112.0537895,
+                    "gallons_bought": Decimal("49.5"),
+                }
+            ],
+            Decimal("148.50"),
+        )
+        instance.generate_map_geojson.return_value = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [-85.6243147, 30.1755249],
+                            [-112.0537895, 41.5092474],
+                        ],
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-112.0537895, 41.5092474],
+                    },
+                },
+            ],
+        }
+        yield instance
+
+
+@pytest.fixture
+def sample_valid_data():
+    return {
+        "start_lon": -85.6243147,
+        "start_lat": 30.1755249,
+        "end_lon": -112.0537895,
+        "end_lat": 41.5092474,
+    }
+
+
+@pytest.fixture
+def sample_invalid_data():
+    return {
+        "start_lon": 1000,
+        "start_lat": 1000,
+        "end_lon": -112.0537895,
+        "end_lat": 41.5092474,
+    }
