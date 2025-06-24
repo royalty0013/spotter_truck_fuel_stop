@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from fuel_stops.utils.import_create_fuelstops import FuelStopImporter
+from fuel_stops.services.import_create_fuelstop_service import ImportCreateFuelStop
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Reading CSV file: {file_path}"))
 
-        importer = FuelStopImporter(file_path)
+        importer = ImportCreateFuelStop(file_path)
 
         try:
             count = importer.import_csv(self)

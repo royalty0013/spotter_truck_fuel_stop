@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from fuel_stops.serializers import OptimalFuelStopRouteSerializer
-from fuel_stops.services.route_optimizer import RouteOptimizer
+from fuel_stops.services.route_optimizer_service import RouteOptimizer
 from fuel_stops.utils.open_route_service import OpenRouteServiceClient
 
 logger = logging.getLogger(__name__)

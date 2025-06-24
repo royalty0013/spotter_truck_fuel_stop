@@ -25,7 +25,7 @@ REQUIRED_FIELDS = [
 BATCH_SIZE = 500
 
 
-class FuelStopImporter:
+class ImportCreateFuelStop:
     """Handles the bulk creation of FuelStop instances from a CSV file."""
 
     def __init__(self, file_path: Path):
