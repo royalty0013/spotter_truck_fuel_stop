@@ -242,6 +242,17 @@ files = [
 ]
 
 [[package]]
+name = "geojson"
+version = "3.2.0"
+description = "Python bindings and utilities for GeoJSON"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "geojson-3.2.0-py3-none-any.whl", hash = "sha256:69d14156469e13c79479672eafae7b37e2dcd19bdfd77b53f74fa8fe29910b52"},
+    {file = "geojson-3.2.0.tar.gz", hash = "sha256:b860baba1e8c6f71f8f5f6e3949a694daccf40820fa8f138b3f712bd85804903"},
+]
+
+[[package]]
 name = "geopy"
 version = "2.4.1"
 description = "Python Geocoding Toolbox"
@@ -768,4 +779,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "4ea10001b2fdcfcee4bc1b6aa672ef0beccf2f79237bee6ba39ae86d4b46c379"
+content-hash = "fbade6aedadc7d3193885d464d4271c90134a98a4a5a0540f26684c452949c7d"

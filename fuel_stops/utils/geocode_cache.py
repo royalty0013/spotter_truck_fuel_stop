@@ -12,6 +12,7 @@ class GeocodeCache:
         self.data: Dict[str, Tuple[float, float]] = self._load()
 
     def _load(self) -> Dict[str, Tuple[float, float]]:
+        """Loads the geocode cache from a JSON file."""
         if not self.path.exists():
             return {}
         try:
@@ -22,9 +23,11 @@ class GeocodeCache:
             return {}
 
     def get(self, key: str) -> Optional[Tuple[float, float]]:
+        """Gets the geocode for a given key."""
         return self.data.get(key)
 
     def set(self, key: str, lat: float, lon: float):
+        """Sets the geocode for a given key."""
         self.data[key] = (lat, lon)
         self.save()
 

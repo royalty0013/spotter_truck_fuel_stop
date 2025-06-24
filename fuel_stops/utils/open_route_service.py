@@ -43,7 +43,15 @@ class OpenRouteServiceClient:
             return None
 
     def _fetch_full_route_from_ors(self, origin: tuple, destination: tuple) -> dict:
-        """Fetch raw GeoJSON response from OpenRouteService."""
+        """Fetches the full route from OpenRouteService.
+
+        Args:
+            origin (tuple): The starting point as a tuple of (longitude, latitude).
+            destination (tuple): The destination point as a tuple of (longitude, latitude).
+
+        Returns:
+            dict: The route data in GeoJSON format.
+        """
         try:
             response = self.client.directions(
                 coordinates=[origin, destination],
@@ -56,7 +64,14 @@ class OpenRouteServiceClient:
             return None
 
     def _simplify_geojson(self, geojson: dict) -> dict:
-        """Convert full GeoJSON into simplified route info."""
+        """Simplifies the GeoJSON response from OpenRouteService.
+
+        Args:
+            geojson (dict): The full GeoJSON response from OpenRouteService.
+
+        Returns:
+            dict: The simplified route data.
+        """
         try:
             summary = geojson["features"][0]["properties"]["summary"]
             steps = geojson["features"][0]["properties"]["segments"][0]["steps"]

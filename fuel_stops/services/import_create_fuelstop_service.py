@@ -25,7 +25,7 @@ REQUIRED_FIELDS = [
 BATCH_SIZE = 500
 
 
-class ImportCreateFuelStop:
+class ImportCreateFuelStopService:
     """Handles the bulk creation of FuelStop instances from a CSV file."""
 
     def __init__(self, file_path: Path):
@@ -34,6 +34,7 @@ class ImportCreateFuelStop:
         self.created_count = 0
 
     def import_csv(self, command) -> int:
+        """Imports fuel stops from a CSV file."""
         if not self.file_path.exists():
             raise FileNotFoundError(f"CSV file not found: {self.file_path}")
 
@@ -65,6 +66,7 @@ class ImportCreateFuelStop:
         return self.created_count
 
     def _build_instance(self, row: dict) -> Optional[FuelStop]:
+        """Builds a FuelStop instance from a row of data."""
         try:
             lat = float(row.get("Latitude", "") or 0)
             lon = float(row.get("Longitude", "") or 0)
@@ -89,6 +91,7 @@ class ImportCreateFuelStop:
         )
 
     def _commit_batch(self, fuelstops: List[FuelStop], command) -> None:
+        """Commits a batch of FuelStop instances to the database."""
         existing_ids = set(
             FuelStop.objects.filter(
                 opis_truckstop__in=[f.opis_truckstop for f in fuelstops]

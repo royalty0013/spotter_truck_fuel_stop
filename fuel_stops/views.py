@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from fuel_stops.serializers import OptimalFuelStopRouteSerializer
-from fuel_stops.services.route_optimizer_service import RouteOptimizer
+from fuel_stops.services.route_optimizer_service import RouteOptimizerService
 from fuel_stops.utils.open_route_service import OpenRouteServiceClient
 
 logger = logging.getLogger(__name__)
@@ -29,14 +29,13 @@ class OptimalFuelStopRouteAPIView(APIView):
         route_data = OpenRouteServiceClient().get_route(
             (start_lon, start_lat), (end_lon, end_lat)
         )
-        logger.error(f"Route data: {route_data}")
         if not route_data:
             return Response(
                 {"error": "Failed to fetch route"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        optimizer = RouteOptimizer(
+        optimizer = RouteOptimizerService(
             start=(start_lon, start_lat),
             steps=route_data.get("steps", []),
             vehicle_range_miles=500,
@@ -45,6 +44,9 @@ class OptimalFuelStopRouteAPIView(APIView):
 
         try:
             fuel_stops, total_cost = optimizer.compute_optimal_stops()
+            map_data = optimizer.generate_map_geojson(
+                route_data.get("geometry"), fuel_stops
+            )
         except Exception as e:
             logger.error(f"Error optimizing fuel stops: {e}")
             return Response({"error": "Route optimization failed"}, status=500)
@@ -53,5 +55,7 @@ class OptimalFuelStopRouteAPIView(APIView):
             {
                 "total_cost": total_cost.quantize(Decimal("0.00")),
                 "fuel_stops": fuel_stops,
-            }
+                "map_data": map_data,
+            },
+            status=status.HTTP_200_OK,
         )

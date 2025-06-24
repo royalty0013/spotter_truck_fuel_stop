@@ -32,6 +32,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
+        """Handles the geocoding of addresses from a CSV file."""
         input_path = Path(kwargs.get("input", "data/fuel-prices-for-be-assessment.csv"))
         output_path = Path(kwargs.get("output", "data/fuelstops_address_geocoded.csv"))
         cache_path = Path(kwargs.get("cache", "data/geocode_cache.json"))
