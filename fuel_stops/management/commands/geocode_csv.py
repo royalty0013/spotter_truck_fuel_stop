@@ -70,17 +70,10 @@ class Command(BaseCommand):
                     lat, lon = coordinate
                     cache.set(truckstop_id, lat, lon)
                     row["Latitude"], row["Longitude"] = lat, lon
-                    print(
-                        f"Geocoded: {truckstop_id} - {truckstop_name} → ({lat}, {lon})"
-                    )
-                    print("*" * 30)
                     writer.writerow(row)
                     time.sleep(1)
                 else:
                     continue
-                    # logger.warning(
-                    #     f"Skipping: No coordinates found for '{truckstop_name}'"
-                    # )
 
         self.stdout.write(
             self.style.SUCCESS(f"Geocoding complete. Output saved to: {output_path}")

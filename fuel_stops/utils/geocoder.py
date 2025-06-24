@@ -18,5 +18,4 @@ class Geocoder:
                 return location.Latitude, location.Longitude
         except (GeocoderTimedOut, GeocoderServiceError) as e:
             logger.error(f"Geocoding service error for {address}: {e}")
-            print(f"Geocoding service error for {address}: {e}")
         return None

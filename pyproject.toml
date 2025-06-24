@@ -16,6 +16,8 @@ geopy = "^2.4.1"
 pandas = "^2.3.0"
 black = "^25.1.0"
 isort = "^6.0.1"
+pytest = "^8.4.1"
+pytest-django = "^4.11.1"
 
 
 [build-system]

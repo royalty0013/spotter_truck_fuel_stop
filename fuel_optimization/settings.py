@@ -133,5 +133,11 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
 GDAL_LIBRARY_PATH = "/opt/homebrew/Cellar/gdal/3.11.0_2/lib/libgdal.dylib"
 GEOS_LIBRARY_PATH = "/opt/homebrew/Cellar/geos/3.13.1/lib/libgeos_c.dylib"

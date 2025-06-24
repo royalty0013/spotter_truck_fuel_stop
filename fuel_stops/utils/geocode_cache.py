@@ -19,7 +19,6 @@ class GeocodeCache:
                 return json.load(f)
         except json.JSONDecodeError:
             logger.warning("Cache file is empty or invalid. Starting fresh.")
-            print("Cache file is empty or invalid. Starting fresh.")
             return {}
 
     def get(self, key: str) -> Optional[Tuple[float, float]]:
