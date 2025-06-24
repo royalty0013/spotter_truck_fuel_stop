@@ -57,8 +57,6 @@ class RouteOptimizerService:
                 nearest_stop = self.find_nearest_fuel_stop(
                     self.current_pos, within=100 * MILES_TO_METERS
                 )
-                print(nearest_stop)
-                print("****************")
                 if not nearest_stop:
                     raise ValidationError("No fuel stop found within range.")
 

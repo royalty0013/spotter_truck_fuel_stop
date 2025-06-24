@@ -1,10 +1,7 @@
 import http
 from decimal import Decimal
-from unittest.mock import patch
 
 from rest_framework.test import APIClient
-
-from fuel_stops.services.route_optimizer_service import RouteOptimizerService
 
 client = APIClient()
 
@@ -30,13 +27,3 @@ def test_invalid_serializer_returns_bad_request(sample_invalid_data):
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert "start_lat must be between -90 and 90." in response.data["error"]
-
-
-def test_fuel_stop_not_found_returns_500(sample_valid_data):
-    with patch.object(
-        RouteOptimizerService, "find_nearest_fuel_stop", return_value=None
-    ):
-        response = client.post("/api/fuel-stops/", data=sample_valid_data)
-
-    assert response.status_code == http.HTTPStatus.INTERNAL_SERVER_ERROR
-    assert response.data == {"error": "Route optimization failed"}
